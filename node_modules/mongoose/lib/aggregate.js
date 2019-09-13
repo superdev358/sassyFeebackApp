@@ -6,6 +6,7 @@
 
 const AggregationCursor = require('./cursor/AggregationCursor');
 const Query = require('./query');
+const applyGlobalMaxTimeMS = require('./helpers/query/applyGlobalMaxTimeMS');
 const util = require('util');
 const utils = require('./utils');
 const read = Query.prototype.read;
@@ -373,7 +374,7 @@ Aggregate.prototype.unwind = function() {
       res.push({ $unwind: arg });
     } else if (typeof arg === 'string') {
       res.push({
-        $unwind: (arg && arg.charAt(0) === '$') ? arg : '$' + arg
+        $unwind: (arg && arg.startsWith('$')) ? arg : '$' + arg
       });
     } else {
       throw new Error('Invalid arg "' + arg + '" to unwind(), ' +
@@ -459,7 +460,7 @@ Aggregate.prototype.sortByCount = function(arg) {
     return this.append({ $sortByCount: arg });
   } else if (typeof arg === 'string') {
     return this.append({
-      $sortByCount: (arg && arg.charAt(0) === '$') ? arg : '$' + arg
+      $sortByCount: (arg && arg.startsWith('$')) ? arg : '$' + arg
     });
   } else {
     throw new TypeError('Invalid arg "' + arg + '" to sortByCount(), ' +
@@ -510,7 +511,7 @@ Aggregate.prototype.graphLookup = function(options) {
     const startWith = cloneOptions.startWith;
 
     if (startWith && typeof startWith === 'string') {
-      cloneOptions.startWith = cloneOptions.startWith.charAt(0) === '$' ?
+      cloneOptions.startWith = cloneOptions.startWith.startsWith('$') ?
         cloneOptions.startWith :
         '$' + cloneOptions.startWith;
     }
@@ -929,18 +930,15 @@ Aggregate.prototype.exec = function(callback) {
     throw new Error('Aggregate not bound to any Model');
   }
   const model = this._model;
-  const pipeline = this._pipeline;
   const collection = this._model.collection;
+
+  applyGlobalMaxTimeMS(this.options, model);
 
   if (this.options && this.options.cursor) {
     return new AggregationCursor(this);
   }
 
   return utils.promiseOrCallback(callback, cb => {
-    if (!pipeline.length) {
-      const err = new Error('Aggregate has empty pipeline');
-      return cb(err);
-    }
 
     prepareDiscriminatorPipeline(this);
 
@@ -951,9 +949,12 @@ Aggregate.prototype.exec = function(callback) {
           cb(error);
         });
       }
+      if (!this._pipeline.length) {
+        return cb(new Error('Aggregate has empty pipeline'));
+      }
 
       const options = utils.clone(this.options || {});
-      collection.aggregate(pipeline, options, (error, cursor) => {
+      collection.aggregate(this._pipeline, options, (error, cursor) => {
         if (error) {
           const _opts = { error: error };
           return model.hooks.execPost('aggregate', this, [null], _opts, error => {

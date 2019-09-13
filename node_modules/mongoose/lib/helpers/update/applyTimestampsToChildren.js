@@ -21,7 +21,7 @@ function applyTimestampsToChildren(now, update, schema) {
   let timestamps;
   let path;
 
-  const hasDollarKey = keys.length && keys[0].charAt(0) === '$';
+  const hasDollarKey = keys.length && keys[0].startsWith('$');
 
   if (hasDollarKey) {
     if (update.$push) {
@@ -84,7 +84,7 @@ function applyTimestampsToChildren(now, update, schema) {
           createdAt = handleTimestampOption(timestamps, 'createdAt');
           updatedAt = handleTimestampOption(timestamps, 'updatedAt');
 
-          if (updatedAt == null) {
+          if (!timestamps || updatedAt == null) {
             continue;
           }
 
@@ -109,6 +109,10 @@ function applyTimestampsToChildren(now, update, schema) {
           timestamps = path.schema.options.timestamps;
           createdAt = handleTimestampOption(timestamps, 'createdAt');
           updatedAt = handleTimestampOption(timestamps, 'updatedAt');
+
+          if (!timestamps) {
+            continue;
+          }
 
           if (updatedAt != null) {
             update.$set[key][updatedAt] = now;
