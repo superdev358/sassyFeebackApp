@@ -8,7 +8,9 @@ require("./models/user");
 require("./models/Survey");
 require("./services/passport");
 
-mongoose.connect(keys.mongoURI, { useNewUrlParser: true });
+mongoose.connect(keys.mongoURI, { 
+	useNewUrlParser: true,
+	useUnifiedTopology: true });
 
 const app = express();
 
@@ -43,7 +45,8 @@ if (process.env.NODE_ENV === 'production') {
 
 
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5000
+;
 
 app.listen(PORT);
 
