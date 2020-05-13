@@ -3,6 +3,7 @@ const helper = sendgrid.mail
 const keys = require('../config/keys')
 const survey = require('../models/Survey')
 
+
 class Mailer extends helper.Mail {
 	constructor({ subject, recipients }, content) {
 		super();

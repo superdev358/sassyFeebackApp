@@ -7,7 +7,6 @@ import Header from "./Header";
 import Landing from "./Landing"
 import Dashboard from './Dashboard'
 
-
 class App extends Component {
 	componentDidMount() {
 		this.props.fetchUser();

@@ -197,9 +197,12 @@ exports.applyPaths = function applyPaths(fields, schema) {
 
     // check for parent exclusions
     const pieces = path.split('.');
-    const root = pieces[0];
-    if (~excluded.indexOf(root)) {
-      return;
+    let cur = '';
+    for (let i = 0; i < pieces.length; ++i) {
+      cur += cur.length ? '.' + pieces[i] : pieces[i];
+      if (excluded.indexOf(cur) !== -1) {
+        return;
+      }
     }
 
     // Special case: if user has included a parent path of a discriminator key,
@@ -245,7 +248,7 @@ exports.applyPaths = function applyPaths(fields, schema) {
       }
       // Any leftover plus paths must in the schema, so delete them (gh-7017)
       for (const key of Object.keys(fields || {})) {
-        if (key.charAt(0) === '+') {
+        if (key.startsWith('+')) {
           delete fields[key];
         }
       }
