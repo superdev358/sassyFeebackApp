@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "axios": "^0.18.1",
+    "concurrently": "^4.1.2",
     "http-proxy-middleware": "^0.19.1",
     "materialize-css": "^1.0.0",
     "react": "^16.4.0",
@@ -13,8 +14,8 @@
     "react-scripts": "^2.1.8",
     "react-stripe-checkout": "^2.6.3",
     "redux": "^4.0.0",
-    "redux-thunk": "^2.3.0",
-    "redux-form": "^8.1.0"
+    "redux-form": "^8.1.0",
+    "redux-thunk": "^2.3.0"
   },
   "scripts": {
     "start": "PORT=3002 react-scripts start",
