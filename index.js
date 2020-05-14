@@ -18,6 +18,9 @@ const app = express();
 app.use(bodyParser.json())
 
 app.use(
+	//cookie session middleware for all reqs, directly storing session data
+	//only need for purposes of user id so fine for our purposes, if more data needed in session store use 
+	//another library such as express session
 	cookieSession({
 		maxAge: 30 * 24 * 60 * 60 * 1000,
 		keys: [keys.cookieKey]
